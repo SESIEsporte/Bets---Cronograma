@@ -350,7 +350,6 @@
     <div class="toolbar">
       <div class="toolbar-left">
         <button class="btn-light" id="addMilestoneBtn">Adicionar marco</button>
-        <button class="btn-light" id="populateBtn">Popular marcos iniciais</button>
         <button class="btn-success" id="clearChecksBtn">Limpar checks</button>
         <button class="btn-light" id="downloadJsonBtn">Baixar JSON</button>
       </div>
@@ -382,10 +381,9 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const initialData = {
-      eyebrow: 'planejamento estratégico',
-      title: 'Cronograma integrado de atividades',
-      subtitle: 'Cronograma editável do projeto de Formação Orientativa em Apostas Esportivas com marcos detalhados, check de conclusão, observações e reorganização manual.',
-      milestones: [
+      eyebrow: 'BETS | Formação Orientativa sobre Apostas Esportivas',
+      title: 'Cronograma',
+        milestones: [
         { date: '26/03', time: '', phase: 'Planejamento', text: 'Apresentação da estratégia de comunicação', owner: '', note: '', done: false },
         { date: '27/03', time: '', phase: 'Planejamento', text: 'Validação da estratégia de comunicação', owner: '', note: '', done: false },
         { date: '30/03', time: '', phase: 'Planejamento', text: 'Briefing para a equipe de criação (redatora e designer)', owner: '', note: '', done: false },
