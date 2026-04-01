@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cronograma editável | Formação Orientativa em Apostas Esportivas</title>
+  <style>
+    :root {
+      --bg: #f3f3f4;
+      --text: #17181b;
+      --muted: #777a80;
+      --line: #e7e7ea;
+      --primary: #e30613;
+      --primary-soft: rgba(227, 6, 19, 0.10);
+      --card: #ffffff;
+      --success: #1e8e3e;
+      --success-soft: rgba(30, 142, 62, 0.08);
+      --warning: #b25b00;
+      --warning-soft: rgba(178, 91, 0, 0.08);
+      --max: 1180px;
+      --shadow: 0 8px 20px rgba(0,0,0,.04);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body { min-height: 100vh; }
+
+    .page {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 24px 48px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #fff;
+      transition: transform .15s ease, opacity .15s ease, background .15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-light { background: #fff; color: var(--text); border-color: #dddddf; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px dashed #c9c9ce; }
+    .btn-success { background: #fff; color: var(--success); border-color: rgba(30,142,62,.22); }
+
+    .hero {
+      background: rgba(255,255,255,.56);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 28px 26px 26px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 4.8vw, 60px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 880px;
+    }
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0 8px;
+    }
+
+    .status-chip {
+      background: #fff;
+      border: 1px solid #ececef;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .status-chip strong {
+      color: var(--text);
+      margin-left: 4px;
+      font-size: 13px;
+    }
+
+    .helper {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .system-message {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 12px;
+      line-height: 1.45;
+      border: 1px solid transparent;
+      background: #fff;
+    }
+
+    .system-message.show { display: block; }
+    .system-message.is-warning {
+      color: var(--warning);
+      background: var(--warning-soft);
+      border-color: rgba(178,91,0,.18);
+    }
+    .system-message.is-error {
+      color: #9b1c1c;
+      background: rgba(227, 6, 19, 0.08);
+      border-color: rgba(227,6,19,.18);
+    }
+    .system-message.is-success {
+      color: var(--success);
+      background: var(--success-soft);
+      border-color: rgba(30,142,62,.18);
+    }
+
+    .milestones {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .milestone {
+      background: var(--card);
+      border: 1px solid #e8e8eb;
+      border-left: 5px solid var(--primary);
+      border-radius: 18px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      transition: background .16s ease, opacity .16s ease, border-color .16s ease;
+    }
+
+    .milestone.is-complete {
+      border-left-color: var(--success);
+      background: #fcfffc;
+      opacity: .84;
+    }
+
+    .milestone.dragging {
+      opacity: .5;
+    }
+
+    .milestone-grid {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .milestone-check {
+      padding-top: 2px;
+    }
+
+    .check-input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--success);
+      cursor: pointer;
+    }
+
+    .milestone-main {
+      min-width: 0;
+    }
+
+    .milestone-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-bottom: 4px;
+    }
+
+    .milestone-date {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .milestone-time {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border-radius: 999px;
+      padding: 3px 7px;
+    }
+
+    .milestone-phase {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--muted);
+    }
+
+    .milestone-text {
+      font-size: 10.5px;
+      line-height: 1.35;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .milestone-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .milestone-owner {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .milestone-note {
+      font-size: 10px;
+      line-height: 1.35;
+      color: #5f6268;
+      background: #f7f7f8;
+      border: 1px dashed #e1e1e5;
+      border-radius: 10px;
+      padding: 6px 8px;
+      min-height: 28px;
+      white-space: pre-wrap;
+    }
+
+    .milestone.is-complete .milestone-text {
+      text-decoration: line-through;
+      color: #5f6861;
+    }
+
+    .milestone-actions {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      border: 1px solid #e2e2e6;
+      background: #fff;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      padding: 0;
+    }
+
+    .drag-btn { cursor: grab; }
+    .drag-btn:active { cursor: grabbing; }
+    .delete-btn:hover { color: var(--primary); border-color: rgba(227,6,19,.18); }
+
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 6px;
+      padding: 1px 3px;
+      transition: background .15s ease;
+    }
+
+    [contenteditable="true"]:focus {
+      background: #fff7f7;
+      box-shadow: inset 0 0 0 1px rgba(227,6,19,.14);
+    }
+
+    .placeholder:empty::before {
+      content: attr(data-placeholder);
+      color: #9a9ca2;
+      font-weight: 500;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 16px 2px 8px;
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 22px 14px 36px; }
+      .hero { padding: 22px 18px 20px; }
+      .milestone-grid { grid-template-columns: 24px 1fr; }
+      .milestone-actions { grid-column: 2; }
+    }
+
+    @media print {
+      .toolbar, .helper, .milestone-actions, .system-message { display: none !important; }
+      body { background: #fff; }
+      .hero { background: #fff; border-color: #ececec; }
+      .milestone { box-shadow: none; }
+      .page { max-width: none; padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn-light" id="addMilestoneBtn">Adicionar marco</button>
+        <button class="btn-light" id="populateBtn">Popular marcos iniciais</button>
+        <button class="btn-success" id="clearChecksBtn">Limpar checks</button>
+        <button class="btn-light" id="downloadJsonBtn">Baixar JSON</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-ghost" onclick="window.print()">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 id="mainTitle"></h1>
+      <p class="subtitle" id="subtitle"></p>
+
+      <div class="status-bar" id="statusBar"></div>
+      <div class="helper">Clique sobre os textos para editar. Arraste os marcos pelo ícone ≡ para reposicionar. As alterações são salvas direto no Supabase.</div>
+      <div class="system-message" id="systemMessage"></div>
+
+      <div class="milestones" id="milestoneList"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const SUPABASE_URL = 'https://imudrgzfebanwbpvqhph.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_BmaR-KNyXC9jBprs1qv27Q_0fPzC2n_';
+    const TABLE_NAME = 'milestones';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const initialData = {
+      eyebrow: 'planejamento estratégico',
+      title: 'Cronograma integrado de atividades',
+      subtitle: 'Cronograma editável do projeto de Formação Orientativa em Apostas Esportivas com marcos detalhados, check de conclusão, observações e reorganização manual.',
+      milestones: [
+        { date: '26/03', time: '', phase: 'Planejamento', text: 'Apresentação da estratégia de comunicação', owner: '', note: '', done: false },
+        { date: '27/03', time: '', phase: 'Planejamento', text: 'Validação da estratégia de comunicação', owner: '', note: '', done: false },
+        { date: '30/03', time: '', phase: 'Planejamento', text: 'Briefing para a equipe de criação (redatora e designer)', owner: '', note: '', done: false },
+        { date: '31/03', time: '', phase: 'Planejamento', text: 'Disponibilizar link', owner: 'Alan', note: '', done: false },
+        { date: '31/03', time: '', phase: 'Planejamento', text: 'Definir identidade visual', owner: '', note: '', done: false },
+        { date: '31/03', time: '', phase: 'Planejamento', text: 'Certificado público 1 (somente alunos - esporte seguro) e registro de participação via Forms', owner: '', note: '', done: false },
+        { date: '03/04', time: '', phase: 'Elaboração', text: 'Envio da primeira proposta de peças para público 1', owner: '', note: '', done: false },
+        { date: '06/04', time: '', phase: 'Elaboração', text: 'Envio da apresentação ajustada', owner: '', note: '', done: false },
+        { date: '07/04', time: '', phase: 'Elaboração', text: 'Envio de ajustes (se aplicável)', owner: '', note: '', done: false },
+        { date: '09/04', time: '', phase: 'Elaboração', text: 'Feedback e fechamento do conteúdo da apresentação', owner: '', note: '', done: false },
+        { date: '09/04', time: '', phase: 'Elaboração', text: 'Envio da proposta final de peças', owner: '', note: '', done: false },
+        { date: '13/04', time: '', phase: 'Execução público 1', text: 'Início da divulgação para público 1', owner: '', note: '', done: false },
+        { date: '23/04', time: '', phase: 'Execução público 1', text: 'Disponibilizar link para Forms de participação', owner: '', note: '', done: false },
+        { date: '24/04', time: '14h', phase: 'Execução público 1', text: 'Ensaio com speaker e intérprete', owner: '', note: '', done: false },
+        { date: '28/04', time: '16h', phase: 'Execução público 1', text: 'Live oficial', owner: '', note: '', done: false },
+        { date: 'A definir', time: '', phase: 'Pós-divulgação', text: 'Reforço da divulgação para público 1', owner: '', note: '', done: false }
+      ]
+    };
+
+    const state = {
+      eyebrow: initialData.eyebrow,
+      title: initialData.title,
+      subtitle: initialData.subtitle,
+      milestones: [],
+      draggedId: null,
+      isBusy: false
+    };
+
+    const eyebrowEl = document.getElementById('eyebrow');
+    const titleEl = document.getElementById('mainTitle');
+    const subtitleEl = document.getElementById('subtitle');
+    const milestoneListEl = document.getElementById('milestoneList');
+    const statusBarEl = document.getElementById('statusBar');
+    const systemMessageEl = document.getElementById('systemMessage');
+
+    const addMilestoneBtn = document.getElementById('addMilestoneBtn');
+    const populateBtn = document.getElementById('populateBtn');
+    const clearChecksBtn = document.getElementById('clearChecksBtn');
+    const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showMessage(type, text) {
+      systemMessageEl.className = `system-message show is-${type}`;
+      systemMessageEl.textContent = text;
+    }
+
+    function clearMessage() {
+      systemMessageEl.className = 'system-message';
+      systemMessageEl.textContent = '';
+    }
+
+    function setBusy(isBusy) {
+      state.isBusy = isBusy;
+      addMilestoneBtn.disabled = isBusy;
+      populateBtn.disabled = isBusy;
+      clearChecksBtn.disabled = isBusy;
+      downloadJsonBtn.disabled = isBusy;
+    }
+
+    function render() {
+      eyebrowEl.textContent = (state.eyebrow || '').toUpperCase();
+      titleEl.textContent = state.title || '';
+      subtitleEl.textContent = state.subtitle || '';
+
+      const total = state.milestones.length;
+      const doneCount = state.milestones.filter(item => item.done).length;
+      const pending = total - doneCount;
+
+      statusBarEl.innerHTML = `
+        <div class="status-chip">Total de marcos <strong>${total}</strong></div>
+        <div class="status-chip">Concluídos <strong>${doneCount}</strong></div>
+        <div class="status-chip">Pendentes <strong>${pending}</strong></div>
+      `;
+
+      if (!state.milestones.length) {
+        milestoneListEl.innerHTML = '<div class="empty-state">Nenhum marco cadastrado. Use “Popular marcos iniciais” ou “Adicionar marco”.</div>';
+        bindStaticEvents();
+        return;
+      }
+
+      milestoneListEl.innerHTML = '';
+
+      state.milestones.forEach((milestone) => {
+        const item = document.createElement('article');
+        item.className = `milestone ${milestone.done ? 'is-complete' : ''}`;
+        item.draggable = true;
+        item.dataset.id = milestone.id;
+
+        item.innerHTML = `
+          <div class="milestone-grid">
+            <div class="milestone-check">
+              <input class="check-input" type="checkbox" data-id="${milestone.id}" ${milestone.done ? 'checked' : ''} aria-label="Concluir marco">
+            </div>
+            <div class="milestone-main">
+              <div class="milestone-top">
+                <div class="milestone-date placeholder" contenteditable="true" data-field="date_text" data-id="${milestone.id}" data-placeholder="dd/mm">${escapeHtml(milestone.date_text)}</div>
+                <div class="milestone-time placeholder" contenteditable="true" data-field="time_text" data-id="${milestone.id}" data-placeholder="hora">${escapeHtml(milestone.time_text)}</div>
+                <div class="milestone-phase placeholder" contenteditable="true" data-field="phase" data-id="${milestone.id}" data-placeholder="fase">${escapeHtml(milestone.phase)}</div>
+              </div>
+              <div class="milestone-text placeholder" contenteditable="true" data-field="text" data-id="${milestone.id}" data-placeholder="Descrição do marco">${escapeHtml(milestone.text)}</div>
+              <div class="milestone-meta">
+                <div class="milestone-owner placeholder" contenteditable="true" data-field="owner" data-id="${milestone.id}" data-placeholder="Responsável">${escapeHtml(milestone.owner)}</div>
+              </div>
+              <div class="milestone-note placeholder" contenteditable="true" data-field="note" data-id="${milestone.id}" data-placeholder="Observações">${escapeHtml(milestone.note)}</div>
+            </div>
+            <div class="milestone-actions">
+              <button class="icon-btn drag-btn" type="button" title="Arrastar para reposicionar" aria-label="Arrastar">≡</button>
+              <button class="icon-btn delete-btn" type="button" data-delete-id="${milestone.id}" title="Excluir marco" aria-label="Excluir">✕</button>
+            </div>
+          </div>
+        `;
+
+        milestoneListEl.appendChild(item);
+      });
+
+      bindStaticEvents();
+      bindMilestoneEvents();
+    }
+
+    function bindStaticEvents() {}
+
+    function bindMilestoneEvents() {
+      milestoneListEl.querySelectorAll('.check-input').forEach(input => {
+        input.addEventListener('change', async (event) => {
+          const id = event.target.dataset.id;
+          const done = event.target.checked;
+          await updateMilestone(id, { done }, false);
+        });
+      });
+
+      milestoneListEl.querySelectorAll('[contenteditable="true"]').forEach(field => {
+        field.addEventListener('blur', async (event) => {
+          const id = event.target.dataset.id;
+          const dbField = event.target.dataset.field;
+          const value = event.target.innerText.trim();
+          await updateMilestone(id, { [dbField]: value }, false);
+        });
+
+        field.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && event.target.dataset.field !== 'note') {
+            event.preventDefault();
+            event.target.blur();
+          }
+        });
+
+        field.addEventListener('paste', (event) => {
+          if (event.target.dataset.field === 'note') return;
+          event.preventDefault();
+          const text = (event.clipboardData || window.clipboardData).getData('text');
+          document.execCommand('insertText', false, text.replace(/\n+/g, ' '));
+        });
+      });
+
+      milestoneListEl.querySelectorAll('[data-delete-id]').forEach(btn => {
+        btn.addEventListener('click', async (event) => {
+          const id = event.currentTarget.dataset.deleteId;
+          const ok = window.confirm('Deseja excluir este marco?');
+          if (!ok) return;
+          await deleteMilestone(id);
+        });
+      });
+
+      milestoneListEl.querySelectorAll('.milestone').forEach(card => {
+        card.addEventListener('dragstart', () => {
+          state.draggedId = card.dataset.id;
+          card.classList.add('dragging');
+        });
+
+        card.addEventListener('dragend', () => {
+          state.draggedId = null;
+          card.classList.remove('dragging');
+        });
+
+        card.addEventListener('dragover', (event) => {
+          event.preventDefault();
+        });
+
+        card.addEventListener('drop', async (event) => {
+          event.preventDefault();
+          const targetId = card.dataset.id;
+          if (!state.draggedId || !targetId || state.draggedId === targetId) return;
+          await moveMilestone(state.draggedId, targetId);
+        });
+      });
+    }
+
+    function applyRows(rows) {
+      state.milestones = [...rows].sort((a, b) => a.sort_order - b.sort_order);
+      render();
+    }
+
+    async function fetchMilestones() {
+      const { data, error } = await supabase
+        .from(TABLE_NAME)
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function loadFromSupabase() {
+      setBusy(true);
+      clearMessage();
+
+      try {
+        const rows = await fetchMilestones();
+        applyRows(rows);
+        if (!rows.length) {
+          showMessage('warning', 'Tabela conectada, mas ainda sem marcos. Clique em “Popular marcos iniciais” para carregar a estrutura inicial.');
+        }
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível carregar os marcos do Supabase. Verifique a tabela "${TABLE_NAME}", as policies para anon e a chave publicável. Detalhe: ${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function updateMilestone(id, patch, reload = true) {
+      const current = state.milestones.find(item => item.id === id);
+      if (!current) return;
+
+      const optimistic = state.milestones.map(item => item.id === id ? { ...item, ...patch } : item);
+      applyRows(optimistic);
+
+      const { error } = await supabase
+        .from(TABLE_NAME)
+        .update(patch)
+        .eq('id', id);
+
+      if (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível salvar a alteração. ${error.message}`);
+        await loadFromSupabase();
+        return;
+      }
+
+      if (reload) {
+        await loadFromSupabase();
+      } else {
+        clearMessage();
+      }
+    }
+
+    async function createMilestone() {
+      setBusy(true);
+      clearMessage();
+
+      try {
+        const nextOrder = state.milestones.length
+          ? Math.max(...state.milestones.map(item => item.sort_order || 0)) + 1
+          : 1;
+
+        const payload = {
+          sort_order: nextOrder,
+          date_text: 'dd/mm',
+          time_text: '',
+          phase: 'Nova etapa',
+          text: 'Novo marco do projeto',
+          owner: '',
+          note: '',
+          done: false
+        };
+
+        const { error } = await supabase
+          .from(TABLE_NAME)
+          .insert([payload]);
+
+        if (error) throw error;
+
+        await loadFromSupabase();
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível criar o marco. ${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function deleteMilestone(id) {
+      setBusy(true);
+      clearMessage();
+
+      try {
+        const { error } = await supabase
+          .from(TABLE_NAME)
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+
+        await normalizeOrder();
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível excluir o marco. ${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function clearChecks() {
+      const ok = window.confirm('Deseja limpar todos os checks de conclusão?');
+      if (!ok) return;
+
+      setBusy(true);
+      clearMessage();
+
+      try {
+        for (const item of state.milestones) {
+          if (!item.done) continue;
+          const { error } = await supabase
+            .from(TABLE_NAME)
+            .update({ done: false })
+            .eq('id', item.id);
+          if (error) throw error;
+        }
+
+        await loadFromSupabase();
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível limpar os checks. ${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function populateInitialMilestones() {
+      const ok = window.confirm('Deseja inserir os marcos iniciais? Use esta opção apenas se a tabela ainda estiver vazia.');
+      if (!ok) return;
+
+      setBusy(true);
+      clearMessage();
+
+      try {
+        const rows = await fetchMilestones();
+        if (rows.length) {
+          showMessage('warning', 'A tabela já possui marcos. Para evitar duplicidade, a carga inicial não foi executada.');
+          return;
+        }
+
+        const payload = initialData.milestones.map((item, index) => ({
+          sort_order: index + 1,
+          date_text: item.date,
+          time_text: item.time,
+          phase: item.phase,
+          text: item.text,
+          owner: item.owner,
+          note: item.note,
+          done: item.done
+        }));
+
+        const { error } = await supabase
+          .from(TABLE_NAME)
+          .insert(payload);
+
+        if (error) throw error;
+
+        await loadFromSupabase();
+        showMessage('success', 'Marcos iniciais inseridos com sucesso.');
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível popular os marcos iniciais. ${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function moveMilestone(draggedId, targetId) {
+      const list = [...state.milestones];
+      const fromIndex = list.findIndex(item => item.id === draggedId);
+      const toIndex = list.findIndex(item => item.id === targetId);
+
+      if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+
+      const [moved] = list.splice(fromIndex, 1);
+      list.splice(toIndex, 0, moved);
+
+      const reordered = list.map((item, index) => ({
+        ...item,
+        sort_order: index + 1
+      }));
+
+      applyRows(reordered);
+
+      try {
+        for (const item of reordered) {
+          const { error } = await supabase
+            .from(TABLE_NAME)
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id);
+
+          if (error) throw error;
+        }
+        clearMessage();
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível salvar a nova ordem. ${error.message}`);
+        await loadFromSupabase();
+      }
+    }
+
+    async function normalizeOrder() {
+      const ordered = [...state.milestones]
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((item, index) => ({ ...item, sort_order: index + 1 }));
+
+      try {
+        for (const item of ordered) {
+          const { error } = await supabase
+            .from(TABLE_NAME)
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id);
+          if (error) throw error;
+        }
+        await loadFromSupabase();
+      } catch (error) {
+        console.error(error);
+        showMessage('error', `Não foi possível normalizar a ordem. ${error.message}`);
+      }
+    }
+
+    function downloadJson() {
+      const exportData = {
+        eyebrow: state.eyebrow,
+        title: state.title,
+        subtitle: state.subtitle,
+        milestones: state.milestones.map(item => ({
+          date: item.date_text,
+          time: item.time_text,
+          phase: item.phase,
+          text: item.text,
+          owner: item.owner,
+          note: item.note,
+          done: item.done
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'cronograma-formacao-bets.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    addMilestoneBtn.addEventListener('click', createMilestone);
+    populateBtn.addEventListener('click', populateInitialMilestones);
+    clearChecksBtn.addEventListener('click', clearChecks);
+    downloadJsonBtn.addEventListener('click', downloadJson);
+
+    render();
+    loadFromSupabase();
+  </script>
+</body>
+</html>
